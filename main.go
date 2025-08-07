@@ -23,6 +23,7 @@ func main() {
 
 	// Routes
 	r.HandleFunc("/api/test", handlers.TestHandler)
+	r.HandleFunc("/api/stocks/{ticker}", handlers.StocksHandler)
 	// r.HandleFunc("/api/auth/google", handlers.LoginHandler)
 
 	// Protected Router requiring authorization key
