@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/WilliamCWhite/sharescout_backend/lib"
 	"github.com/gorilla/mux"
-	// "github.com/piquette/finance-go/chart"
-	// "github.com/piquette/finance-go/datetime"
 
 	"github.com/piquette/finance-go/chart"
-  "github.com/piquette/finance-go/datetime"
+	"github.com/piquette/finance-go/datetime"
 )
 
 type ChartInterval struct {
@@ -21,6 +20,7 @@ type ChartInterval struct {
 
 type ResponseBar struct {
 	Close float64 `json:"close_price"`
+	Date time.Time `json:"date"`
 }
 
 // Simply for ensuring that the backend is receiving requests
@@ -43,11 +43,13 @@ func StocksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	interval := lib.DetermineInterval(chartInterval.StartDate, chartInterval.EndDate)
+
 	params := &chart.Params{
 		Symbol: ticker,
 		Start: datetime.New(&chartInterval.StartDate),
 		End: datetime.New(&chartInterval.EndDate),
-		Interval: datetime.OneDay,
+		Interval: interval,
 	}
 
 	iter := chart.Get(params)
@@ -58,6 +60,7 @@ func StocksHandler(w http.ResponseWriter, r *http.Request) {
 		close_price, _ := bar.Close.Float64()
 		rBar := ResponseBar{
 			Close: close_price,
+			Date: time.Unix(int64(bar.Timestamp), 0).UTC(),
 		}
 		jsonRes = append(jsonRes, rBar)
 	}
