@@ -4,25 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/WilliamCWhite/sharescout_backend/lib"
 	"github.com/gorilla/mux"
-
-	"github.com/piquette/finance-go/chart"
-	"github.com/piquette/finance-go/datetime"
 )
 
-type RequestInterval struct {
-	StartDate time.Time `json:"start_date"`
-	EndDate   time.Time `json:"end_date"`
-}
-
-// Contains float value and UNIX timestamp / 1000
-type DataPoint struct {
-	Value float64 `json:"value"`
-	Timestamp int `json:"time"`
-}
 
 // Simply for ensuring that the backend is receiving requests
 func StocksHandler(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +22,7 @@ func StocksHandler(w http.ResponseWriter, r *http.Request) {
 	ticker := vars["ticker"]
 	fmt.Printf("Processing request with ticker %v\n", ticker)
 
-	var reqInterval RequestInterval
+	var reqInterval lib.RequestInterval
 	err := json.NewDecoder(r.Body).Decode(&reqInterval)
 	if err != nil {
 		fmt.Printf("Decoding error: %v\n", err)
@@ -44,26 +30,15 @@ func StocksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	interval := lib.DetermineInterval(reqInterval.StartDate, reqInterval.EndDate)
+	sPoints := lib.GetServerDataPoints(ticker, reqInterval)
 
-	params := &chart.Params{
-		Symbol: ticker,
-		Start: datetime.New(&reqInterval.StartDate),
-		End: datetime.New(&reqInterval.EndDate),
-		Interval: interval,
-	}
-
-	iter := chart.Get(params)
-
-	jsonRes := []DataPoint{}
-	for iter.Next() {
-		bar := iter.Bar()
-		close_price, _ := bar.Close.Float64()
-		rBar := DataPoint{
-			Value: close_price,
-			Timestamp: bar.Timestamp, //bar.Timestamp happens to give the exact data format the frontend wants
+	jsonRes := make([]lib.DataPoint, len(sPoints))
+	for i, p := range(sPoints) {
+		floatPrice, _ := p.Value.Float64()
+		jsonRes[i] = lib.DataPoint{
+			Value: floatPrice,
+			Timestamp: p.Timestamp,
 		}
-		jsonRes = append(jsonRes, rBar)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
