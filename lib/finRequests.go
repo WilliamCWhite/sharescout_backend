@@ -5,7 +5,7 @@ import (
 	"github.com/piquette/finance-go/datetime"
 )
 
-func GetServerDataPoints(ticker string, reqInterval RequestInterval) []ServerDataPoint {
+func GetApiDataPoints(ticker string, reqInterval RequestInterval) []ApiPoint {
 	interval := DetermineInterval(reqInterval.StartDate, reqInterval.EndDate)
 
 	params := &chart.Params{
@@ -17,10 +17,10 @@ func GetServerDataPoints(ticker string, reqInterval RequestInterval) []ServerDat
 
 	iter := chart.Get(params)
 
-	jsonRes := []ServerDataPoint{}
+	jsonRes := []ApiPoint{}
 	for iter.Next() {
 		bar := iter.Bar()
-		rBar := ServerDataPoint{
+		rBar := ApiPoint{
 			Value: bar.Close,
 			Timestamp: int64(bar.Timestamp), //bar.Timestamp happens to give the exact data format the frontend wants
 		}
@@ -28,4 +28,3 @@ func GetServerDataPoints(ticker string, reqInterval RequestInterval) []ServerDat
 	}
 	return jsonRes
 }
-

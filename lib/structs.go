@@ -12,12 +12,12 @@ type RequestInterval struct {
 }
 
 // Contains float value and UNIX timestamp / 1000
-type DataPoint struct {
+type ResponseDataPoint struct {
 	Value float64 `json:"value"`
 	Timestamp int64 `json:"time"`
 }
 
-type ServerDataPoint struct {
+type ApiPoint struct {
 	Value decimal.Decimal `json:"value"`
 	Timestamp int64 `json:"time"`
 }
@@ -43,4 +43,12 @@ type TestHoldingPoint struct {
 	Shares decimal.Decimal `json:"shares"`
 	Input decimal.Decimal `json:"input"` // negative input is output (withdraws)
 	Value decimal.Decimal `json:"value"`
+}
+
+type ResponsePoint struct {
+	Timestamp int64 `json:"timestamp"`
+	Price float64 `json:"price"`
+	PercentGrowth float64 `json:"percent_growth"`
+	ThousandIn float64 `json:"thousand_in"`
+	PercentReturns float64 `json:"percent_returns"`
 }

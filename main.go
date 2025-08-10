@@ -25,6 +25,8 @@ func main() {
 	r.HandleFunc("/api/test", handlers.TestHandler)
 	r.HandleFunc("/api/stocks/{ticker}", handlers.StocksHandler)
 	r.HandleFunc("/api/holdings/{ticker}", handlers.HoldingsHandler)
+	r.HandleFunc("/api/chart/{ticker}", handlers.ChartHandler)
+
 	// r.HandleFunc("/api/auth/google", handlers.LoginHandler)
 
 	// Protected Router requiring authorization key

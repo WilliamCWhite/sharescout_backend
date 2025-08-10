@@ -44,7 +44,7 @@ func HoldingsHandler(w http.ResponseWriter, r *http.Request) {
 		EndDate: time.Now(),
 	}
 
-	dataPoints := lib.GetServerDataPoints(ticker, reqInterval)
+	dataPoints := lib.GetApiDataPoints(ticker, reqInterval)
 	holdingPoints := []lib.HoldingPoint{}
 
 	shares := decimal.NewFromFloat(0)

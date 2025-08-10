@@ -11,7 +11,7 @@ import (
 
 
 // Simply for ensuring that the backend is receiving requests
-func StocksHandler(w http.ResponseWriter, r *http.Request) {
+func ChartHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		fmt.Println("StocksHandler can only receive post requests")
 		http.Error(w, "Only POST method allowed", http.StatusMethodNotAllowed)
@@ -30,19 +30,22 @@ func StocksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sPoints := lib.GetApiDataPoints(ticker, reqInterval)
+	apiPoints := lib.GetApiDataPoints(ticker, reqInterval)
+	dividends, err := lib.GetDividends(ticker, reqInterval)
+	if err != nil {
+		fmt.Printf("dividends error: %v\n", err)
+		http.Error(w, "Invalid JSON in request", http.StatusBadRequest)
+		return
+	}
 
-	jsonRes := make([]lib.ResponseDataPoint, len(sPoints))
-	for i, p := range(sPoints) {
-		floatPrice, _ := p.Value.Float64()
-		jsonRes[i] = lib.ResponseDataPoint{
-			Value: floatPrice,
-			Timestamp: p.Timestamp,
-		}
+	responsePoints, err := lib.GenerateResponsePoints(apiPoints, dividends)
+	if err != nil {
+		fmt.Printf("responsePoints error: %v\n", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(jsonRes)
+	err = json.NewEncoder(w).Encode(responsePoints)
 	if err != nil {
 		fmt.Printf("Error encoding json: %v\n", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
