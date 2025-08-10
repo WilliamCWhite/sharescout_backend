@@ -19,7 +19,6 @@ func GenerateResponsePoints(apiPoints []ApiPoint, dividends []DividendPoint) ([]
 	initialBalance := decimal.NewFromFloat(1000)
 	hundred := decimal.NewFromFloat(100)
 	shares := initialBalance.Div(initialPrice)
-
 	j := 0 // used to iterate through dividends
 	for i := 0; i < len(apiPoints); {
 		// Conditions to add transaction
@@ -34,7 +33,7 @@ func GenerateResponsePoints(apiPoints []ApiPoint, dividends []DividendPoint) ([]
 			// the dividend at the upcoming closing price
 			if (dividends[j].Timestamp < apiPoints[i].Timestamp) {
 				// add dividendAmount/Price shares
-				shares = shares.Add( dividends[j].Amount.Div(apiPoints[i].Value) )
+				shares = shares.Add( dividends[j].Amount.Mul(shares).Div(apiPoints[i].Value) )
 				j++
 			}
 		}

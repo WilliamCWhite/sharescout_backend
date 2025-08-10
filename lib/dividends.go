@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sort"
 
 	"github.com/shopspring/decimal"
 )
@@ -75,6 +76,12 @@ func GetDividends(ticker string, reqInterval RequestInterval) ([]DividendPoint, 
 			}
 			i++
 		}
+
+		//dividendPoints was not in order
+		sort.Slice(dividendPoints, func(x, y int) bool {
+			return dividendPoints[x].Timestamp < dividendPoints[y].Timestamp
+		})
+
 		return dividendPoints, nil
 	}
 

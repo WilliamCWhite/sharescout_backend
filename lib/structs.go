@@ -48,7 +48,7 @@ type TestHoldingPoint struct {
 type ResponsePoint struct {
 	Timestamp int64 `json:"timestamp"`
 	Price float64 `json:"price"`
-	PercentGrowth float64 `json:"percent_growth"`
-	ThousandIn float64 `json:"thousand_in"`
-	PercentReturns float64 `json:"percent_returns"`
+	PercentGrowth float64 `json:"percentGrowth"`
+	ThousandIn float64 `json:"thousandIn"`
+	PercentReturns float64 `json:"percentReturns"`
 }
