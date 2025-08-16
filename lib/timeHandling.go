@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"fmt"
 	"time"
 
   "github.com/piquette/finance-go/datetime"
@@ -48,24 +49,53 @@ func getApproxTimeDiff(t1, t2 time.Time) timeDiff {
 func DetermineInterval(startDate, endDate time.Time) datetime.Interval {
 	timeDiff := getApproxTimeDiff(startDate, endDate)
 
-	// Attempts to keep resolution between 40 and 100 points
-	if timeDiff.Hours <= 1 {
-		return datetime.OneMin
-	} else if timeDiff.Hours <= 3 {
-		return datetime.TwoMins
-	} else if timeDiff.Days <= 1 {
-		return datetime.FiveMins
-	} else if timeDiff.Days <= 3 {
-		return datetime.FifteenMins
-	} else if timeDiff.Days <= 7 {
-		return datetime.ThirtyMins
-	} else if timeDiff.Days <= 23 {
-		return datetime.OneHour
-	} else if timeDiff.Days <= 100 {
-		return datetime.OneDay
-	} else if timeDiff.Years <= 2 {
-		return datetime.FiveDay
-	} else if timeDiff.Years <= 10 {
+	now := time.Now()
+	oneWeekAgo := now.AddDate(0, 0, -7)
+	eightWeeksAgo := now.AddDate(0, 0, -56)
+	fourYearsAgo := now.AddDate(-4, 0, 0)
+	twentyYearsAgo := now.AddDate(-20, 0, 0)
+
+	// Attempts to keep resolution between 40 and 100 points in general
+	
+	// Need special logic to prevent asking for precise intervals too far in the past where yahoo rejects it
+	if startDate.After(oneWeekAgo) {
+		if timeDiff.Hours <= 1 {
+			return datetime.OneMin
+		} else if timeDiff.Hours <= 3 {
+			return datetime.TwoMins
+		} else if timeDiff.Days <= 1 {
+			return datetime.FiveMins
+		} else if timeDiff.Days <= 3 {
+			return datetime.FifteenMins
+		} else if timeDiff.Days <= 7 {
+			return datetime.ThirtyMins
+		} 
+	} else if startDate.After(eightWeeksAgo) {
+		fmt.Println("After four weeks ago")
+		if timeDiff.Days <= 7 {
+			return datetime.ThirtyMins
+		} else if timeDiff.Days <= 20 {
+			return datetime.OneHour
+		} else if timeDiff.Days <= 100 {
+			return datetime.OneDay
+		} 
+	} else if startDate.After(fourYearsAgo) {
+		if timeDiff.Days <= 100 {
+			return datetime.OneDay
+		} else if timeDiff.Years <= 2 {
+			return datetime.FiveDay
+		} else if timeDiff.Years <= 10 {
+			return datetime.OneMonth
+		}
+	} else if startDate.After(twentyYearsAgo) {
+		if timeDiff.Years <= 2 {
+			return datetime.FiveDay
+		} else if timeDiff.Years <= 10 {
+			return datetime.OneMonth
+		}
+	}
+
+	if timeDiff.Years <= 10 {
 		return datetime.OneMonth
 	} else if timeDiff.Years <= 20 {
 		return datetime.ThreeMonth
