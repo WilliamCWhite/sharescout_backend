@@ -10,8 +10,8 @@ import (
 )
 
 
-// Simply for ensuring that the backend is receiving requests
-func ChartHandler(w http.ResponseWriter, r *http.Request) {
+// Handles requests from the "/stocks" path
+func StockHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		fmt.Println("StocksHandler can only receive post requests")
 		http.Error(w, "Only POST method allowed", http.StatusMethodNotAllowed)
@@ -30,8 +30,8 @@ func ChartHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	apiPoints := lib.GetApiDataPoints(ticker, reqInterval)
-	dividends, err := lib.GetDividends(ticker, reqInterval)
+	apiPoints := lib.GetApiPoints(ticker, reqInterval)
+	dividends, err := lib.GetDividendPoints(ticker, reqInterval)
 	if err != nil {
 		fmt.Printf("dividends error: %v\n", err)
 		http.Error(w, "Invalid JSON in request", http.StatusBadRequest)

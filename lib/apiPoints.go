@@ -5,7 +5,8 @@ import (
 	"github.com/piquette/finance-go/datetime"
 )
 
-func GetApiDataPoints(ticker string, reqInterval RequestInterval) []ApiPoint {
+// Uses piquette/finance-go to get the closing prices and timestamps for a ticker across an interval
+func GetApiPoints(ticker string, reqInterval RequestInterval) []ApiPoint {
 	interval := DetermineInterval(reqInterval.StartDate, reqInterval.EndDate)
 
 	params := &chart.Params{

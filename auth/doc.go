@@ -1,2 +1,2 @@
-// Contains logic for dealing with Google OAuth, JWT Handling, and CORS Handling
+// Contains logic for dealing CORS
 package auth

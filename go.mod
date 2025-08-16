@@ -5,9 +5,7 @@ go 1.23.0
 toolchain go1.23.12
 
 require (
-	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/gorilla/mux v1.8.1
-	github.com/joho/godotenv v1.5.1
 	github.com/piquette/finance-go v1.1.0
 	github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24
 )

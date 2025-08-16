@@ -7,13 +7,14 @@ import (
 )
 
 // The difference in time. If the difference is one year, years = 1 and days = 365
-type TimeDiff struct {
+type timeDiff struct {
 	Years int
 	Days int
 	Hours int
 }
 
-func getApproxTimeDiff(t1, t2 time.Time) TimeDiff {
+// converts time objects to a time difference that's easier to figure out intervals for
+func getApproxTimeDiff(t1, t2 time.Time) timeDiff {
 	if t2.Before(t1) {
 		t1, t2 = t2, t1
 	}
@@ -35,13 +36,15 @@ func getApproxTimeDiff(t1, t2 time.Time) TimeDiff {
 	days := tempDays + years * 365
 	hours := tempHours + days * 365
 
-	return TimeDiff{
+	return timeDiff{
 		Years: years,
 		Days: days,
 		Hours: hours,
 	}
 }
 
+// Uses a start date and an end date to get the interval passed into piquette-finance go,
+// effectively determining the amount of points received from the data
 func DetermineInterval(startDate, endDate time.Time) datetime.Interval {
 	timeDiff := getApproxTimeDiff(startDate, endDate)
 

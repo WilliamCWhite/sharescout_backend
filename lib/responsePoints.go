@@ -6,38 +6,44 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// Uses divdends and apiPoints to calculate the response points
 func GenerateResponsePoints(apiPoints []ApiPoint, dividends []DividendPoint) ([]ResponsePoint, error) {
 	if len(apiPoints) == 0 {
 		return nil, fmt.Errorf("apiPoints is empty")
 	}
 
-
 	responsePoints := make([]ResponsePoint, len(apiPoints))
 
-	initialTimestamp := apiPoints[0].Timestamp
-	initialPrice := apiPoints[0].Value
+	// constants
 	initialBalance := decimal.NewFromFloat(1000)
 	hundred := decimal.NewFromFloat(100)
+	// variables for tracking calculations over time
+	initialTimestamp := apiPoints[0].Timestamp
+	initialPrice := apiPoints[0].Value
 	shares := initialBalance.Div(initialPrice)
+	
 	j := 0 // used to iterate through dividends
 	for i := 0; i < len(apiPoints); {
-		// Conditions to add transaction
+		// Conditions to consider a dividend
 		if len(dividends) > 0 && j < len(dividends) {
-			// Skip dividends that come before any api point
-			if (dividends[j].Timestamp < initialTimestamp) {
+			// Skip dividends that come before all points
+			if dividends[j].Timestamp < initialTimestamp {
 				j++
 				continue
 			}
 
 			// For any dividend before the upcoming point, buy shares with
 			// the dividend at the upcoming closing price
-			if (dividends[j].Timestamp < apiPoints[i].Timestamp) {
+			if dividends[j].Timestamp < apiPoints[i].Timestamp {
 				// add dividendAmount/Price shares
-				shares = shares.Add( dividends[j].Amount.Mul(shares).Div(apiPoints[i].Value) )
+				shares = shares.Add(dividends[j].Amount.Mul(shares).Div(apiPoints[i].Value))
 				j++
 			}
+
+			// if dividends are after the current point, they aren't considered
 		}
 
+		// perform calculations for current point
 		current_price := apiPoints[i].Value
 		price, _ := current_price.Float64()
 		// (p - p0) / p0 * 100
@@ -48,10 +54,10 @@ func GenerateResponsePoints(apiPoints []ApiPoint, dividends []DividendPoint) ([]
 		percentReturns, _ := (thousandInDecimal.Sub(initialBalance)).Div(initialBalance).Mul(hundred).Float64()
 
 		responsePoints[i] = ResponsePoint{
-			Timestamp: apiPoints[i].Timestamp,
-			Price: price,
-			PercentGrowth: percentGrowth,
-			ThousandIn: thousandIn,
+			Timestamp:      apiPoints[i].Timestamp,
+			Price:          price,
+			PercentGrowth:  percentGrowth,
+			ThousandIn:     thousandIn,
 			PercentReturns: percentReturns,
 		}
 		i++

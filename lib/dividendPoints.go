@@ -9,37 +9,30 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// Must access the following json object:
 // data.chart.result[0].events.dividends;
-
+// need many structs to do so cleanly
 type DividendEvent struct {
 	Amount float64 `json:"amount"`
-	Date int64 `json:"date"`
+	Date   int64   `json:"date"`
 }
-
 type DividendEvents struct {
 	Dividends map[string]DividendEvent `json:"dividends"`
 }
-
 type Result struct {
 	Events DividendEvents `json:"events"`
 }
-
 type Chart struct {
 	Result []Result `json:"result"`
 }
-
 type ChartResponse struct {
 	Chart Chart `json:"chart"`
 }
 
-type DividendPoint struct {
-	Amount decimal.Decimal `json:"amount"`
-	Timestamp int64 `json:"timestamp"`
-}
-
-// INFO: Make sure the request interval is sufficiently large
-func GetDividends(ticker string, reqInterval RequestInterval) ([]DividendPoint, error) {
-	url := fmt.Sprintf("https://query2.finance.yahoo.com/v8/finance/chart/%s?period1=%d&period2=%d&interval=1mo&events=div", 
+// Accesses yahoo finance to get the dividends for a ticker over an interval
+func GetDividendPoints(ticker string, reqInterval RequestInterval) ([]DividendPoint, error) {
+	// Make request to api
+	url := fmt.Sprintf("https://query2.finance.yahoo.com/v8/finance/chart/%s?period1=%d&period2=%d&interval=1d&events=div",
 		ticker, reqInterval.StartDate.Unix(), reqInterval.EndDate.Unix(),
 	)
 
@@ -58,12 +51,14 @@ func GetDividends(ticker string, reqInterval RequestInterval) ([]DividendPoint, 
 	}
 	defer resp.Body.Close()
 
+	// Decode json
 	var data ChartResponse
-	err = json.NewDecoder(resp.Body).Decode(&data);
+	err = json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {
 		return nil, fmt.Errorf("Error decoding dividends: %w", err)
 	}
 
+	// Create dividend points if the response exists
 	if len(data.Chart.Result) > 0 {
 		dividends := data.Chart.Result[0].Events.Dividends
 
@@ -72,12 +67,12 @@ func GetDividends(ticker string, reqInterval RequestInterval) ([]DividendPoint, 
 		for _, div := range dividends {
 			dividendPoints[i] = DividendPoint{
 				Timestamp: div.Date,
-				Amount: decimal.NewFromFloat(div.Amount),
+				Amount:    decimal.NewFromFloat(div.Amount),
 			}
 			i++
 		}
 
-		//dividendPoints was not in order
+		// ensure dividend points is ordered by date
 		sort.Slice(dividendPoints, func(x, y int) bool {
 			return dividendPoints[x].Timestamp < dividendPoints[y].Timestamp
 		})
@@ -87,4 +82,3 @@ func GetDividends(ticker string, reqInterval RequestInterval) ([]DividendPoint, 
 
 	return nil, fmt.Errorf("No results found")
 }
-
