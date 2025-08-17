@@ -71,18 +71,18 @@ func DetermineInterval(startDate, endDate time.Time) datetime.Interval {
 			return datetime.ThirtyMins
 		} 
 	} else if startDate.After(eightWeeksAgo) {
-		fmt.Println("After four weeks ago")
+		fmt.Println("After eight weeks ago")
 		if timeDiff.Days <= 7 {
 			return datetime.ThirtyMins
-		} else if timeDiff.Days <= 20 {
+		} else if timeDiff.Days <= 35 {
 			return datetime.OneHour
 		} else if timeDiff.Days <= 100 {
 			return datetime.OneDay
 		} 
 	} else if startDate.After(fourYearsAgo) {
-		if timeDiff.Days <= 100 {
+		if timeDiff.Days <= 365 {
 			return datetime.OneDay
-		} else if timeDiff.Years <= 2 {
+		} else if timeDiff.Years <= 5 {
 			return datetime.FiveDay
 		} else if timeDiff.Years <= 10 {
 			return datetime.OneMonth
