@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"encoding/json"
 	"net/http"
+	"net/url"
 
 	"github.com/gorilla/mux"
 )
@@ -28,9 +29,12 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	input := vars["input"]
-	fmt.Printf("Processing search with input %v\n", input)
+	encodedInput := url.QueryEscape(input)
+	
+	fmt.Printf("Processing search with input %v\n", encodedInput)
 
-	url := fmt.Sprintf("https://query2.finance.yahoo.com/v1/finance/search?q=%s", input)
+
+	url := fmt.Sprintf("https://query2.finance.yahoo.com/v1/finance/search?q=%s", encodedInput)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -59,8 +63,25 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var sendData []Quote
+
+	j := 0
+	for i := 0; i < len(result.Quotes); i++ {
+		if (j >= 5) {
+			break;
+		}
+		if (result.Quotes[i].Type == "Option") {
+			continue
+		} else {
+			sendData = append(sendData, result.Quotes[i])
+			j++
+		}
+
+	}
+
+
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(result.Quotes)
+	err = json.NewEncoder(w).Encode(sendData)
 	if err != nil {
 		fmt.Printf("Error encoding json: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

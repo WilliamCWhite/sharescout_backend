@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/WilliamCWhite/sharescout_backend/lib"
 	"github.com/gorilla/mux"
@@ -20,7 +21,9 @@ func StockHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	ticker := vars["ticker"]
-	fmt.Printf("Processing request with ticker %v\n", ticker)
+	encodedTicker := url.QueryEscape(ticker)
+	fmt.Printf("Processing request with ticker %v\n", encodedTicker)
+	
 
 	var reqInterval lib.RequestInterval
 	err := json.NewDecoder(r.Body).Decode(&reqInterval)
